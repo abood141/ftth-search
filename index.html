@@ -1,3 +1,1714 @@
-<!-- Placeholder for FTTH Search tool -->
-<h1>FTTH Search Tool</h1>
-<p>Please upload the content of index.html from your desktop to this file.</p></p></h1>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#07090F">
+    <title>FTTH — بحث المشتركين</title>
+    <meta name="description" content="أداة البحث عن مشتركي FTTH للفنيين">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg: #07090F;
+            --bg2: #0D1220;
+            --bg3: #121A2E;
+            --bg4: #1A2440;
+            --blue: #4F8EF7;
+            --blue-d: #2563EB;
+            --green: #10D9A0;
+            --green-d: #059669;
+            --red: #F75D5D;
+            --amber: #F5A623;
+            --purple: #A78BFA;
+            --cyan: #22D3EE;
+            --text: #E8EFF8;
+            --muted: #5A6A85;
+            --border: #1E2D45;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --max-w: 520px;
+        }
+
+        html {
+            text-rendering: optimizeSpeed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Tajawal', Tahoma, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        /* ── Animated BG ── */
+        .bg-orbs {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-orbs .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.07;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--blue);
+            top: -180px;
+            right: -150px;
+            animation: orb-float 22s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--green);
+            bottom: -120px;
+            left: -120px;
+            animation: orb-float 28s ease-in-out infinite reverse;
+        }
+
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: var(--purple);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: orb-float 18s ease-in-out infinite 3s;
+        }
+
+        @keyframes orb-float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(40px, -30px) scale(1.08);
+            }
+
+            66% {
+                transform: translate(-30px, 25px) scale(0.94);
+            }
+        }
+
+        /* ── App Shell ── */
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 16px 14px env(safe-area-inset-bottom, 24px);
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            padding: 28px 0 20px;
+        }
+
+        .header-logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-d), var(--blue));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 28px rgba(79, 142, 247, 0.3);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(79, 142, 247, 0.25);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(79, 142, 247, 0.4);
+            }
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 18px;
+            margin-bottom: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(79, 142, 247, 0.2);
+        }
+
+        .card-glow-blue {
+            border-color: rgba(79, 142, 247, 0.25);
+            box-shadow: 0 0 20px rgba(79, 142, 247, 0.06);
+        }
+
+        .card-glow-green {
+            border-color: rgba(16, 217, 160, 0.25);
+            box-shadow: 0 0 20px rgba(16, 217, 160, 0.06);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .card-title .icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .icon-blue {
+            background: rgba(79, 142, 247, 0.15);
+        }
+
+        .icon-green {
+            background: rgba(16, 217, 160, 0.12);
+        }
+
+        .icon-amber {
+            background: rgba(245, 166, 35, 0.12);
+        }
+
+        /* ── Inputs ── */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .ico {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            pointer-events: none;
+            color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 40px 12px 14px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.12);
+        }
+
+        input::placeholder {
+            color: var(--muted);
+        }
+
+        .pw-toggle {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 13px 22px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, var(--blue-d), var(--blue));
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-blue:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-blue:active {
+            transform: translateY(0);
+        }
+
+        .btn-blue:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--green-d), var(--green));
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-sm {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg3);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 9px 6px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .tab.active {
+            background: var(--blue);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(79, 142, 247, 0.3);
+        }
+
+        .tab:not(.active):hover {
+            background: rgba(79, 142, 247, 0.08);
+            color: var(--text);
+        }
+
+        /* ── Status Bars ── */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .status-ok {
+            background: rgba(16, 217, 160, 0.08);
+            border: 1px solid rgba(16, 217, 160, 0.18);
+            color: var(--green);
+        }
+
+        .status-warn {
+            background: rgba(245, 166, 35, 0.08);
+            border: 1px solid rgba(245, 166, 35, 0.18);
+            color: var(--amber);
+        }
+
+        .status-err {
+            background: rgba(247, 93, 93, 0.08);
+            border: 1px solid rgba(247, 93, 93, 0.18);
+            color: var(--red);
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-green {
+            background: var(--green);
+            animation: blink 2s infinite;
+        }
+
+        .dot-amber {
+            background: var(--amber);
+            animation: blink 1s infinite;
+        }
+
+        .dot-red {
+            background: var(--red);
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .status-actions {
+            margin-right: auto;
+            display: flex;
+            gap: 6px;
+        }
+
+        /* ── Suggestion List ── */
+        .suggest-list {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: -8px;
+            margin-bottom: 14px;
+        }
+
+        .suggest-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(30, 45, 69, 0.5);
+            transition: background 0.15s;
+            gap: 8px;
+        }
+
+        .suggest-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggest-item:hover,
+        .suggest-item:active {
+            background: rgba(79, 142, 247, 0.08);
+        }
+
+        .suggest-item .name {
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .suggest-item .meta {
+            font-size: 0.72rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .suggest-hint {
+            padding: 14px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        /* ── Result Cards ── */
+        .result {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0;
+            margin-bottom: 14px;
+            overflow: hidden;
+            animation: slide-up 0.35s ease forwards;
+            opacity: 0;
+            transition: border-color 0.25s, box-shadow 0.2s;
+        }
+
+        .result:hover {
+            border-color: rgba(79, 142, 247, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            background: var(--bg3);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-name {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: rgba(16, 217, 160, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(16, 217, 160, 0.25);
+        }
+
+        .badge-red {
+            background: rgba(247, 93, 93, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(247, 93, 93, 0.25);
+        }
+
+        .badge-amber {
+            background: rgba(245, 166, 35, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(245, 166, 35, 0.25);
+        }
+
+        .badge-blue {
+            background: rgba(79, 142, 247, 0.12);
+            color: var(--blue);
+            border: 1px solid rgba(79, 142, 247, 0.25);
+        }
+
+        .badge-cyan {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--cyan);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
+        /* ── Result Sections ── */
+        .result-section {
+            padding: 14px 18px;
+        }
+
+        .result-section+.result-section {
+            border-top: 1px solid var(--border);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--blue);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .section-title .sec-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .sec-blue {
+            background: rgba(79, 142, 247, 0.12);
+        }
+
+        .sec-green {
+            background: rgba(16, 217, 160, 0.12);
+        }
+
+        .sec-amber {
+            background: rgba(245, 166, 35, 0.12);
+        }
+
+        .sec-cyan {
+            background: rgba(34, 211, 238, 0.12);
+        }
+
+        .sec-purple {
+            background: rgba(167, 139, 250, 0.12);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .result-grid .field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            background: var(--bg3);
+            border-radius: 8px;
+            padding: 9px 12px;
+        }
+
+        .result-grid .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            font-size: 0.62rem;
+            color: var(--muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .field-value {
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            direction: ltr;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .field-value.rtl {
+            font-family: inherit;
+            direction: rtl;
+            word-break: normal;
+        }
+
+        /* ── Signal Quality ── */
+        .signal-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 3px;
+        }
+
+        .signal-bar .bar {
+            flex: 1;
+            height: 4px;
+            background: var(--bg4);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .signal-bar .bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s;
+        }
+
+        .signal-good {
+            background: var(--green);
+        }
+
+        .signal-ok {
+            background: var(--amber);
+        }
+
+        .signal-bad {
+            background: var(--red);
+        }
+
+        /* ── Detail loading ── */
+        .detail-loading {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        .spinner-blue {
+            border-color: rgba(79, 142, 247, 0.2);
+            border-top-color: var(--blue);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .loading-center .spinner {
+            width: 26px;
+            height: 26px;
+        }
+
+        /* ── Empty ── */
+        .empty {
+            text-align: center;
+            padding: 40px 16px;
+            color: var(--muted);
+        }
+
+        .empty .emoji {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        /* ── Toast ── */
+        .toast-wrap {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9000;
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--bg2);
+            border-radius: var(--radius-sm);
+            padding: 11px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            animation: toast-in 0.25s ease;
+        }
+
+        .toast-ok {
+            border: 1px solid rgba(16, 217, 160, 0.35);
+        }
+
+        .toast-err {
+            border: 1px solid rgba(247, 93, 93, 0.35);
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Welcome Badge ── */
+        .welcome-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px 14px 6px 8px;
+            font-size: 0.78rem;
+            margin-bottom: 14px;
+        }
+
+        .welcome-badge .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-d), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* ── Results Count ── */
+        .results-count {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+            padding: 0 2px;
+        }
+
+        .results-count span {
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .app {
+                padding: 10px 10px env(safe-area-inset-bottom, 20px);
+            }
+
+            .header {
+                padding: 18px 0 14px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .card {
+                padding: 18px 14px;
+            }
+
+            .result-section {
+                padding: 12px 14px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab {
+                font-size: 0.72rem;
+                padding: 8px 4px;
+            }
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--muted);
+            border-radius: 3px;
+        }
+
+        /* ── Visibility ── */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ── Page Transition ── */
+        .fade-in {
+            animation: fade-in 0.3s ease;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app">
+        <!-- ── Header ── -->
+        <header class="header">
+            <div class="header-logo">🌐</div>
+            <h1>FTTH بحث المشتركين</h1>
+            <p>أداة البحث للفنيين</p>
+        </header>
+
+        <!-- ══════════════════════════════════════════════ -->
+        <!-- LOGIN SECTION -->
+        <!-- ══════════════════════════════════════════════ -->
+        <section id="loginSection" class="fade-in">
+            <div class="card card-glow-blue">
+                <div class="card-title">
+                    <div class="icon icon-blue">🔐</div>
+                    تسجيل الدخول
+                </div>
+
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <div class="input-wrap">
+                        <span class="ico">👤</span>
+                        <input type="text" id="loginUser" placeholder="اسم المستخدم" autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <div class="input-wrap">
+                        <span class="ico">🔑</span>
+                        <input type="password" id="loginPass" placeholder="كلمة المرور" autocomplete="current-password">
+                        <button class="pw-toggle" id="togglePass" type="button">👁</button>
+                    </div>
+                </div>
+
+                <div id="loginError" class="hidden"
+                    style="color:var(--red);font-size:0.78rem;padding:8px 12px;background:rgba(247,93,93,0.08);border-radius:8px;margin-bottom:12px;font-weight:600;">
+                </div>
+
+                <button class="btn btn-blue" id="loginBtn" onclick="doLogin()">
+                    دخول ←
+                </button>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════ -->
+        <!-- CONNECTING SECTION -->
+        <!-- ══════════════════════════════════════════════ -->
+        <section id="connectingSection" class="hidden">
+            <div class="card">
+                <div class="loading-center" style="padding:50px 20px;">
+                    <div class="spinner spinner-blue" style="width:30px;height:30px;"></div>
+                    <span>جاري الاتصال بنظام FTTH...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════ -->
+        <!-- SEARCH SECTION -->
+        <!-- ══════════════════════════════════════════════ -->
+        <section id="searchSection" class="hidden fade-in">
+            <!-- Welcome + Status -->
+            <div class="welcome-badge" id="welcomeBadge">
+                <div class="avatar" id="avatarLetter"></div>
+                <span id="welcomeName"></span>
+            </div>
+
+            <div class="status status-ok" id="statusBar">
+                <div class="dot dot-green"></div>
+                <span>متصل بالنظام — جاهز للبحث</span>
+                <div class="status-actions">
+                    <button class="btn btn-sm"
+                        style="background:rgba(247,93,93,0.12);color:var(--red);border:1px solid rgba(247,93,93,0.25);"
+                        onclick="doLogout()">خروج</button>
+                </div>
+            </div>
+
+            <!-- Search Card -->
+            <div class="card card-glow-green">
+                <div class="card-title">
+                    <div class="icon icon-green">🔍</div>
+                    بحث عن مشترك
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs" id="searchTabs">
+                    <button class="tab active" data-type="username" onclick="setSearchType('username')">🧑‍💻
+                        يوزر</button>
+                    <button class="tab" data-type="name" onclick="setSearchType('name')">📝 اسم</button>
+                    <button class="tab" data-type="number" onclick="setSearchType('number')">📞 رقم</button>
+                </div>
+
+                <div class="form-group">
+                    <label id="searchLabel">ادخل اسم المستخدم (يوزر)</label>
+                    <div class="input-wrap">
+                        <span class="ico" id="searchIcon">🧑‍💻</span>
+                        <input type="text" id="searchInput" placeholder="مثال: user123" autocomplete="off"
+                            oninput="onSearchInput()" onkeydown="onSearchKey(event)">
+                    </div>
+                </div>
+
+                <button class="btn btn-green" id="searchBtn" onclick="doSearch()">
+                    🔍 بحث
+                </button>
+            </div>
+
+            <!-- Suggestion List (shown during typing for partial search) -->
+            <div id="suggestBox" class="hidden"></div>
+
+            <!-- Results -->
+            <div id="resultsContainer"></div>
+        </section>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-wrap" id="toastWrap"></div>
+
+    <script>
+        // ════════════════════════════════════════════════
+        //  CONFIG
+        // ════════════════════════════════════════════════
+        const FTTH_URL = 'https://admin.ftth.iq';
+        const FTTH_USER = 'link1';
+        const FTTH_PASS = 'ALI931990ali';
+
+        // SpaceLink Supabase (technician auth)
+        const SB_URL = 'https://icpqrnzvxjexdzwfkcjm.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljcHFybnp2eGpleGR6d2ZrY2ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDE2ODksImV4cCI6MjA4OTQxNzY4OX0.mvnD_Cr1EbBtMLiD0VwhdxXAo8bSDTRxRyF2Squ0aE8';
+        const SB_HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
+
+        // ════════════════════════════════════════════════
+        //  CORS PROXY (allows file:/// to call FTTH API)
+        // ════════════════════════════════════════════════
+        const CORS_PROXIES = [
+            url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+            url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        ];
+        let activeProxy = 0;
+
+        function proxyUrl(url) {
+            // If running from localhost or https, try direct first
+            if (location.protocol === 'http:' || location.protocol === 'https:') return url;
+            // From file:/// use CORS proxy
+            return CORS_PROXIES[activeProxy](url);
+        }
+
+        async function proxyFetch(url, opts = {}) {
+            // Try direct first
+            try {
+                const res = await fetch(url, opts);
+                return res;
+            } catch (directErr) {
+                // Direct failed (likely CORS) — try proxies
+                for (let i = 0; i < CORS_PROXIES.length; i++) {
+                    try {
+                        const pUrl = CORS_PROXIES[i](url);
+                        // For proxy, we strip custom headers that the proxy won't forward
+                        const proxyOpts = { ...opts };
+                        const res = await fetch(pUrl, proxyOpts);
+                        activeProxy = i; // Remember which proxy worked
+                        return res;
+                    } catch { }
+                }
+                throw directErr;
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        //  STATE
+        // ════════════════════════════════════════════════
+        let ftthToken = null;
+        let searchType = 'username';
+        let currentUser = null;
+        let searchTimer = null;
+
+        // ════════════════════════════════════════════════
+        //  HASH (same as SpaceLink DJB2)
+        // ════════════════════════════════════════════════
+        function hashPw(pw) {
+            let h = 5381;
+            for (let i = 0; i < pw.length; i++) h = ((h << 5) + h) ^ pw.charCodeAt(i);
+            return (h >>> 0).toString(16).padStart(8, '0');
+        }
+
+        // ════════════════════════════════════════════════
+        //  SUPABASE QUERY
+        // ════════════════════════════════════════════════
+        async function sbQuery(table, filter) {
+            const url = `${SB_URL}/rest/v1/${table}${filter ? '?' + filter : ''}`;
+            const res = await fetch(url, { headers: SB_HDR });
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        // ════════════════════════════════════════════════
+        //  TOAST
+        // ════════════════════════════════════════════════
+        function toast(msg, type = 'ok') {
+            const wrap = document.getElementById('toastWrap');
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            const icons = { ok: '✅', err: '❌' };
+            el.innerHTML = `<span>${icons[type] || '✅'}</span><span>${msg}</span>`;
+            wrap.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0'; el.style.transform = 'translateY(-14px)'; el.style.transition = 'all 0.25s';
+                setTimeout(() => el.remove(), 250);
+            }, 3200);
+        }
+
+        // ════════════════════════════════════════════════
+        //  PASSWORD TOGGLE
+        // ════════════════════════════════════════════════
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const inp = document.getElementById('loginPass');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            this.textContent = inp.type === 'password' ? '👁' : '🙈';
+        });
+
+        // ════════════════════════════════════════════════
+        //  TECHNICIAN LOGIN (via SpaceLink Supabase)
+        // ════════════════════════════════════════════════
+        async function doLogin() {
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            const btn = document.getElementById('loginBtn');
+            const errDiv = document.getElementById('loginError');
+
+            errDiv.classList.add('hidden');
+
+            if (!u || !p) { errDiv.textContent = '❌ أدخل اسم المستخدم وكلمة المرور'; errDiv.classList.remove('hidden'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> جاري التحقق...';
+
+            try {
+                // Query tech_users from Supabase
+                const users = await sbQuery('tech_users', `username=eq.${encodeURIComponent(u)}`);
+                const techUser = users.find(x => x.username === u && x.password_hash === hashPw(p));
+
+                if (!techUser) {
+                    errDiv.textContent = '❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+                    errDiv.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = 'دخول ←';
+                    return;
+                }
+
+                // Get technician name
+                let techName = u;
+                try {
+                    const techs = await sbQuery('technicians', `id=eq.${techUser.tech_id}`);
+                    if (techs.length > 0) techName = techs[0].name;
+                } catch { }
+
+                currentUser = { username: u, techId: techUser.tech_id, name: techName };
+
+                // Now connect to FTTH
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('connectingSection').classList.remove('hidden');
+
+                const connected = await connectFTTH();
+
+                document.getElementById('connectingSection').classList.add('hidden');
+
+                if (connected) {
+                    showSearchView();
+                    toast(`مرحباً ${techName} 👋`);
+                } else {
+                    document.getElementById('loginSection').classList.remove('hidden');
+                    errDiv.textContent = '⚠️ تعذر الاتصال بنظام FTTH — حاول مرة أخرى';
+                    errDiv.classList.remove('hidden');
+                }
+
+            } catch (err) {
+                errDiv.textContent = 'خطأ في الاتصال: ' + err.message;
+                errDiv.classList.remove('hidden');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'دخول ←';
+        }
+
+        // Enter to login
+        document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+        document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+
+        // ════════════════════════════════════════════════
+        //  FTTH CONNECTION
+        // ════════════════════════════════════════════════
+        async function connectFTTH() {
+            try {
+                const form = new URLSearchParams();
+                form.append('grant_type', 'password');
+                form.append('scope', 'openid profile');
+                form.append('client_id', '');
+                form.append('username', FTTH_USER);
+                form.append('password', FTTH_PASS);
+
+                const res = await proxyFetch(`${FTTH_URL}/api/auth/Contractor/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json, text/plain, */*',
+                    },
+                    body: form
+                });
+
+                const data = await res.json();
+                if (data.access_token) { ftthToken = data.access_token; return true; }
+            } catch { }
+            return false;
+        }
+
+        async function reconnectFTTH() {
+            const bar = document.getElementById('statusBar');
+            bar.className = 'status status-warn';
+            bar.querySelector('span:not(.dot)') && (bar.children[1].textContent = 'جاري إعادة الاتصال...');
+            bar.children[0].className = 'dot dot-amber';
+
+            const ok = await connectFTTH();
+
+            if (ok) {
+                bar.className = 'status status-ok';
+                bar.children[0].className = 'dot dot-green';
+                bar.children[1].textContent = 'متصل بالنظام — جاهز للبحث';
+                toast('تم إعادة الاتصال');
+            } else {
+                bar.className = 'status status-err';
+                bar.children[0].className = 'dot dot-red';
+                bar.children[1].textContent = 'غير متصل — اضغط إعادة المحاولة';
+            }
+            return ok;
+        }
+
+        // ════════════════════════════════════════════════
+        //  SHOW / HIDE VIEWS
+        // ════════════════════════════════════════════════
+        function showSearchView() {
+            document.getElementById('searchSection').classList.remove('hidden');
+
+            // Set welcome info
+            const name = currentUser?.name || currentUser?.username || '';
+            document.getElementById('welcomeName').textContent = `مرحباً، ${name}`;
+            document.getElementById('avatarLetter').textContent = name.charAt(0);
+
+            document.getElementById('searchInput').focus();
+        }
+
+        function doLogout() {
+            ftthToken = null;
+            currentUser = null;
+            document.getElementById('searchSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loginPass').value = '';
+            document.getElementById('resultsContainer').innerHTML = '';
+            document.getElementById('suggestBox').classList.add('hidden');
+            toast('تم تسجيل الخروج');
+        }
+
+        // ════════════════════════════════════════════════
+        //  SEARCH TYPE SWITCH
+        // ════════════════════════════════════════════════
+        function setSearchType(type) {
+            searchType = type;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
+
+            const label = document.getElementById('searchLabel');
+            const icon = document.getElementById('searchIcon');
+            const input = document.getElementById('searchInput');
+
+            const config = {
+                username: { label: 'ادخل اسم المستخدم (يوزر)', icon: '🧑‍💻', ph: 'مثال: user123' },
+                name: { label: 'ادخل اسم المشترك (جزء من الاسم يكفي)', icon: '📝', ph: 'مثال: توفيق' },
+                number: { label: 'ادخل رقم المشترك', icon: '📞', ph: 'مثال: 07701234567' },
+            };
+
+            const c = config[type];
+            label.textContent = c.label;
+            icon.textContent = c.icon;
+            input.placeholder = c.ph;
+            input.value = '';
+            input.focus();
+
+            document.getElementById('suggestBox').classList.add('hidden');
+            document.getElementById('resultsContainer').innerHTML = '';
+        }
+
+        // ════════════════════════════════════════════════
+        //  PARTIAL SEARCH (live suggestions)
+        // ════════════════════════════════════════════════
+        function onSearchInput() {
+            clearTimeout(searchTimer);
+            const q = document.getElementById('searchInput').value.trim();
+
+            if (q.length < 2) {
+                document.getElementById('suggestBox').classList.add('hidden');
+                return;
+            }
+
+            // Debounce: wait 500ms after typing stops
+            searchTimer = setTimeout(() => fetchSuggestions(q), 500);
+        }
+
+        function onSearchKey(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimer);
+                document.getElementById('suggestBox').classList.add('hidden');
+                doSearch();
+            }
+        }
+
+        async function fetchSuggestions(q) {
+            if (!ftthToken) return;
+
+            const box = document.getElementById('suggestBox');
+            box.classList.remove('hidden');
+            box.innerHTML = '<div class="suggest-hint"><span class="spinner spinner-blue" style="width:16px;height:16px;"></span> جاري البحث...</div>';
+
+            try {
+                const items = await ftthSearch(q);
+
+                if (!items || items.length === 0) {
+                    box.innerHTML = '<div class="suggest-hint">لا توجد نتائج</div>';
+                    return;
+                }
+
+                let html = '<div class="suggest-list">';
+                items.forEach((sub, i) => {
+                    const name = sub.name || sub.subscriberName || sub.fullName || '—';
+                    const uname = sub.username || sub.userName || '';
+                    html += `<div class="suggest-item" onclick="selectSuggestion(${i})" data-index="${i}">
+                        <div class="name">${name}</div>
+                        <div class="meta">${uname}</div>
+                    </div>`;
+                });
+                html += '</div>';
+                box.innerHTML = html;
+
+                // Store items for selection
+                box._items = items;
+
+            } catch (err) {
+                box.innerHTML = '<div class="suggest-hint" style="color:var(--red);">خطأ في البحث</div>';
+            }
+        }
+
+        async function selectSuggestion(index) {
+            const box = document.getElementById('suggestBox');
+            const items = box._items;
+            if (!items || !items[index]) return;
+
+            box.classList.add('hidden');
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `<div class="loading-center"><div class="spinner spinner-blue"></div><span>جاري تحميل التفاصيل...</span></div>`;
+
+            const detailed = await fetchSubscriberDetail(items[index]);
+            renderResults([detailed], '');
+        }
+
+        // ════════════════════════════════════════════════
+        //  FTTH API HELPERS
+        // ════════════════════════════════════════════════
+        async function ftthGet(path) {
+            const url = `${FTTH_URL}${path}`;
+            const res = await proxyFetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${ftthToken}`,
+                    'Accept': 'application/json, text/plain, */*',
+                }
+            });
+            if (res.status === 401) {
+                const ok = await reconnectFTTH();
+                if (!ok) throw new Error('Session expired');
+                return ftthGet(path);
+            }
+            if (!res.ok) return null;
+            return res.json();
+        }
+
+        async function ftthSearch(query) {
+            const params = new URLSearchParams();
+            params.append('pageSize', '20');
+            params.append('pageNumber', '1');
+            params.append('sortCriteria.property', 'expires');
+            params.append('sortCriteria.direction', 'asc');
+            params.append('hierarchyLevel', '0');
+
+            switch (searchType) {
+                case 'username': params.append('username', query); break;
+                case 'name': params.append('name', query); break;
+                case 'number': params.append('phone', query); break;
+            }
+
+            const data = await ftthGet(`/api/subscriptions?${params.toString()}`);
+            if (!data) return [];
+            if (Array.isArray(data)) return data;
+            if (data.items) return data.items;
+            if (data.data) return data.data;
+            if (data.username || data.name) return [data];
+            return [];
+        }
+
+        // Fetch full subscriber details (technical info)
+        async function fetchSubscriberDetail(sub) {
+            const id = sub.id || sub.subscriptionId || sub.subscriberId;
+            if (!id) return sub;
+
+            try {
+                // Try to get detailed subscription info
+                const detail = await ftthGet(`/api/subscriptions/${id}`);
+                if (detail) return { ...sub, ...detail, _detailed: true };
+            } catch { }
+
+            return sub;
+        }
+
+        // ════════════════════════════════════════════════
+        //  FULL SEARCH (button click)
+        // ════════════════════════════════════════════════
+        async function doSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const btn = document.getElementById('searchBtn');
+            const container = document.getElementById('resultsContainer');
+
+            if (!query) { toast('ادخل قيمة البحث', 'err'); return; }
+
+            if (!ftthToken) {
+                toast('جاري إعادة الاتصال...', 'err');
+                const ok = await reconnectFTTH();
+                if (!ok) return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> جاري البحث...';
+            document.getElementById('suggestBox').classList.add('hidden');
+            container.innerHTML = `<div class="loading-center"><div class="spinner spinner-blue"></div><span>جاري البحث عن "${query}"...</span></div>`;
+
+            try {
+                const items = await ftthSearch(query);
+                renderResults(items, query);
+
+                // Fetch detailed info for each result
+                if (items && items.length > 0 && items.length <= 5) {
+                    for (let i = 0; i < items.length; i++) {
+                        const detailed = await fetchSubscriberDetail(items[i]);
+                        items[i] = detailed;
+                    }
+                    renderResults(items, query);
+                }
+            } catch (err) {
+                container.innerHTML = '';
+                toast('خطأ في البحث: ' + err.message, 'err');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '🔍 بحث';
+        }
+
+        // ════════════════════════════════════════════════
+        //  DATA EXTRACTION HELPERS
+        // ════════════════════════════════════════════════
+        function fmtDate(val) {
+            if (!val) return '—';
+            return String(val).replace('T', ' ').replace('Z', '').substring(0, 16);
+        }
+
+        function v(sub, ...keys) {
+            for (const k of keys) {
+                if (sub[k] !== undefined && sub[k] !== null && sub[k] !== '') return sub[k];
+            }
+            return '—';
+        }
+
+        function getStatus(sub) {
+            if (!sub.expires) return { label: 'غير معروف', cls: 'badge-amber' };
+            const exp = new Date(sub.expires);
+            if (exp < new Date()) return { label: 'منتهي', cls: 'badge-red' };
+            return { label: 'فعال', cls: 'badge-green' };
+        }
+
+        function getSessionStatus(sub) {
+            const s = sub.sessionStatus || sub.activeSessionStatus ||
+                sub.activeSession?.status || sub.session?.status || '';
+            const sLower = String(s).toLowerCase();
+            if (sLower === 'up' || sLower === 'online' || sLower === 'active' || s === 'متصل')
+                return { label: 'متصل (Up)', cls: 'badge-green' };
+            if (sLower === 'down' || sLower === 'offline' || sLower === 'inactive' || s === 'غير متصل')
+                return { label: 'غير متصل (Down)', cls: 'badge-red' };
+            if (s) return { label: s, cls: 'badge-amber' };
+            return { label: '—', cls: 'badge-amber' };
+        }
+
+        function getSignalInfo(sub) {
+            const rx = sub.rxPower || sub.receivePower || sub.signalLevel ||
+                sub.rxSignal || sub.ontRxPower || sub.activeSession?.rxPower || null;
+            if (rx === null || rx === undefined || rx === '') return { val: '—', pct: 0, cls: '' };
+            const num = parseFloat(rx);
+            if (isNaN(num)) return { val: rx, pct: 50, cls: 'signal-ok' };
+            // Signal quality: > -20 = good, -20 to -25 = ok, < -25 = bad
+            let pct, cls;
+            if (num > -20) { pct = 90; cls = 'signal-good'; }
+            else if (num > -25) { pct = 55; cls = 'signal-ok'; }
+            else { pct = 25; cls = 'signal-bad'; }
+            return { val: num.toFixed(2) + ' dBm', pct, cls };
+        }
+
+        // ════════════════════════════════════════════════
+        //  RENDER RESULTS (Sectioned Cards)
+        // ════════════════════════════════════════════════
+        function renderResults(items, query) {
+            const container = document.getElementById('resultsContainer');
+
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="card"><div class="empty">
+                    <div class="emoji">🔍</div>
+                    <p>لا توجد نتائج${query ? ` لـ "<strong>${query}</strong>"` : ''}</p>
+                    <p style="margin-top:6px;font-size:0.75rem;color:var(--muted)">تأكد من البيانات وحاول مرة أخرى</p>
+                </div></div>`;
+                return;
+            }
+
+            let html = `<div class="results-count">تم العثور على <span>${items.length}</span> نتيجة</div>`;
+
+            items.forEach((sub, i) => {
+                const status = getStatus(sub);
+                const session = getSessionStatus(sub);
+                const signal = getSignalInfo(sub);
+
+                const name = v(sub, 'name', 'subscriberName', 'fullName');
+                const uname = v(sub, 'username', 'userName');
+                const phone = v(sub, 'phone', 'mobile', 'phoneNumber');
+
+                // Device / ONT info
+                const ontModel = v(sub, 'ontModel', 'ontType', 'deviceName', 'deviceModel', 'ontName', 'ont_model');
+                const ontSerial = v(sub, 'ontSerial', 'ontSn', 'serialNumber', 'ontSerialNumber', 'ont_serial', 'sn');
+                const fdt = v(sub, 'fdt', 'fdtName', 'fdt_name', 'fdtCode');
+                const fat = v(sub, 'fat', 'fatName', 'fat_name', 'fatCode');
+
+                // Subscription info
+                const plan = v(sub, 'planName', 'plan', 'profileName', 'profile', 'serviceName', 'service');
+                const devicePw = v(sub, 'password', 'devicePassword', 'ontPassword', 'pppoePassword', 'pppoe_password');
+                const exp = fmtDate(sub.expires || sub.expiryDate);
+
+                // IP / MAC
+                const ip = v(sub, 'ipAddress', 'ip', 'framedIpAddress', 'activeSession.ipAddress', 'assignedIp');
+                const mac = v(sub, 'macAddress', 'mac', 'ontMac', 'activeSession.macAddress');
+
+                html += `
+                <div class="result" style="animation-delay:${i * 0.06}s">
+                    <!-- Header -->
+                    <div class="result-head">
+                        <div class="result-name">${name}</div>
+                        <div style="display:flex;gap:5px;flex-wrap:wrap">
+                            <div class="badge ${status.cls}">${status.label}</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 1: معلومات الاتصال -->
+                    <div class="result-section">
+                        <div class="section-title">
+                            <div class="sec-icon sec-blue">📞</div>
+                            معلومات الاتصال
+                        </div>
+                        <div class="result-grid">
+                            <div class="field">
+                                <span class="field-label">اسم المشترك</span>
+                                <span class="field-value rtl">${name}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">رقم الهاتف</span>
+                                <span class="field-value">${phone}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">اليوزر</span>
+                                <span class="field-value">${uname}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: معلومات الجهاز -->
+                    <div class="result-section">
+                        <div class="section-title">
+                            <div class="sec-icon sec-cyan">📡</div>
+                            معلومات الجهاز
+                        </div>
+                        <div class="result-grid">
+                            <div class="field">
+                                <span class="field-label">اسم الجهاز (ONT)</span>
+                                <span class="field-value">${ontModel}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">تسلسل ONT</span>
+                                <span class="field-value">${ontSerial}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">FDT</span>
+                                <span class="field-value">${fdt}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">FAT</span>
+                                <span class="field-value">${fat}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: الاشتراك -->
+                    <div class="result-section">
+                        <div class="section-title">
+                            <div class="sec-icon sec-green">📋</div>
+                            معلومات الاشتراك
+                        </div>
+                        <div class="result-grid">
+                            <div class="field">
+                                <span class="field-label">نوع الباقة</span>
+                                <span class="field-value rtl">${plan}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">كلمة مرور الجهاز</span>
+                                <span class="field-value">${devicePw}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">تاريخ انتهاء الصلاحية</span>
+                                <span class="field-value">${exp}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: الحالة الفنية -->
+                    <div class="result-section">
+                        <div class="section-title">
+                            <div class="sec-icon sec-amber">⚡</div>
+                            الحالة الفنية
+                        </div>
+                        <div class="result-grid">
+                            <div class="field">
+                                <span class="field-label">حالة الجلسة</span>
+                                <span class="badge ${session.cls}" style="align-self:flex-start;margin-top:2px;">${session.label}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">القدرة المستلمة (RX Power)</span>
+                                <span class="field-value" style="color:${signal.cls === 'signal-good' ? 'var(--green)' : signal.cls === 'signal-bad' ? 'var(--red)' : 'var(--amber)'}">${signal.val}</span>
+                                ${signal.pct > 0 ? `<div class="signal-bar"><div class="bar"><div class="bar-fill ${signal.cls}" style="width:${signal.pct}%"></div></div></div>` : ''}
+                            </div>
+                            <div class="field">
+                                <span class="field-label">IP Address</span>
+                                <span class="field-value">${ip}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">MAC Address</span>
+                                <span class="field-value">${mac}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Read-only footer -->
+                    <div style="padding:8px 18px;background:var(--bg3);border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:0.68rem;color:var(--muted)">🔒 عرض فقط — لا يمكن التعديل</span>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ════════════════════════════════════════════════
+        //  NO AUTO-LOGIN — always require technician credentials
+        // ════════════════════════════════════════════════
+    </script>
+</body>
+
+</html>
