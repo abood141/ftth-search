@@ -1064,47 +1064,12 @@
         const SB_HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
 
         // ════════════════════════════════════════════════
-        //  CORS PROXY (allows file:/// to call FTTH API)
+        //  NETWORK LAYER
         // ════════════════════════════════════════════════
-        const CORS_PROXIES = [
-            url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-            url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            url => `https://corsproxy.org/?${encodeURIComponent(url)}`,
-        ];
-        let activeProxy = 0;
         const isLocal = location.protocol === 'file:';
 
         async function proxyFetch(url, opts = {}) {
-            // From http/https origins, try direct first
-            if (!isLocal) {
-                try {
-                    const res = await fetch(url, opts);
-                    if (res.ok || res.status === 401) return res;
-                } catch { }
-            }
-
-            // Use CORS proxy
-            for (let i = 0; i < CORS_PROXIES.length; i++) {
-                try {
-                    const pUrl = CORS_PROXIES[i](url);
-                    // For proxy, strip Origin/Referer headers that cause issues
-                    const proxyHeaders = {};
-                    if (opts.headers) {
-                        for (const [k, val] of Object.entries(opts.headers)) {
-                            const lk = k.toLowerCase();
-                            if (lk !== 'origin' && lk !== 'referer') proxyHeaders[k] = val;
-                        }
-                    }
-                    const proxyOpts = { ...opts, headers: proxyHeaders };
-                    const res = await fetch(pUrl, proxyOpts);
-                    if (res.ok || res.status === 401) {
-                        activeProxy = i;
-                        return res;
-                    }
-                } catch { }
-            }
-
-            throw new Error('جميع محاولات الاتصال فشلت');
+            return fetch(url, opts);
         }
 
         // ════════════════════════════════════════════════
@@ -1210,7 +1175,11 @@
                     toast(`مرحباً ${techName} 👋`);
                 } else {
                     document.getElementById('loginSection').classList.remove('hidden');
-                    errDiv.textContent = '⚠️ تعذر الاتصال بنظام FTTH — حاول مرة أخرى';
+                    if (isLocal) {
+                        errDiv.innerHTML = '⚠️ لا يمكن الاتصال من الملف المحلي.<br>افتح الأداة من الرابط:<br><a href="https://abood141.github.io/ftth-search/" style="color:var(--blue);text-decoration:underline;font-weight:700;" target="_blank">abood141.github.io/ftth-search</a>';
+                    } else {
+                        errDiv.textContent = '⚠️ تعذر الاتصال بنظام FTTH — حاول مرة أخرى';
+                    }
                     errDiv.classList.remove('hidden');
                 }
 
