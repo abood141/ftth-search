@@ -1023,21 +1023,15 @@
                     بحث عن مشترك
                 </div>
 
-                <!-- Tabs -->
-                <div class="tabs" id="searchTabs">
-                    <button class="tab active" data-type="username" onclick="setSearchType('username')">🧑‍💻
-                        يوزر</button>
-                    <button class="tab" data-type="name" onclick="setSearchType('name')">📝 اسم</button>
-                    <button class="tab" data-type="number" onclick="setSearchType('number')">📞 رقم</button>
-                </div>
-
+                <!-- Smart Search (auto-detects type) -->
                 <div class="form-group">
-                    <label id="searchLabel">ادخل اسم المستخدم (يوزر)</label>
+                    <label id="searchLabel">ابحث بالاسم، اليوزر، أو الرقم</label>
                     <div class="input-wrap">
-                        <span class="ico" id="searchIcon">🧑‍💻</span>
-                        <input type="text" id="searchInput" placeholder="مثال: user123" autocomplete="off"
+                        <span class="ico" id="searchIcon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="اكتب اسم، يوزر، أو رقم..." autocomplete="off"
                             oninput="onSearchInput()" onkeydown="onSearchKey(event)">
                     </div>
+                    <div id="searchHint" style="display:flex;align-items:center;gap:5px;margin-top:6px;font-size:0.7rem;color:var(--muted);min-height:18px;"></div>
                 </div>
 
                 <button class="btn btn-green" id="searchBtn" onclick="doSearch()">
@@ -1068,6 +1062,50 @@
         const SB_URL = 'https://icpqrnzvxjexdzwfkcjm.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljcHFybnp2eGpleGR6d2ZrY2ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDE2ODksImV4cCI6MjA4OTQxNzY4OX0.mvnD_Cr1EbBtMLiD0VwhdxXAo8bSDTRxRyF2Squ0aE8';
         const SB_HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
+
+        // ════════════════════════════════════════════════
+        //  CORS PROXY (allows file:/// to call FTTH API)
+        // ════════════════════════════════════════════════
+        const CORS_PROXIES = [
+            url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            url => `https://corsproxy.org/?${encodeURIComponent(url)}`,
+        ];
+        let activeProxy = 0;
+        const isLocal = location.protocol === 'file:';
+
+        async function proxyFetch(url, opts = {}) {
+            // From http/https origins, try direct first
+            if (!isLocal) {
+                try {
+                    const res = await fetch(url, opts);
+                    if (res.ok || res.status === 401) return res;
+                } catch { }
+            }
+
+            // Use CORS proxy
+            for (let i = 0; i < CORS_PROXIES.length; i++) {
+                try {
+                    const pUrl = CORS_PROXIES[i](url);
+                    // For proxy, strip Origin/Referer headers that cause issues
+                    const proxyHeaders = {};
+                    if (opts.headers) {
+                        for (const [k, val] of Object.entries(opts.headers)) {
+                            const lk = k.toLowerCase();
+                            if (lk !== 'origin' && lk !== 'referer') proxyHeaders[k] = val;
+                        }
+                    }
+                    const proxyOpts = { ...opts, headers: proxyHeaders };
+                    const res = await fetch(pUrl, proxyOpts);
+                    if (res.ok || res.status === 401) {
+                        activeProxy = i;
+                        return res;
+                    }
+                } catch { }
+            }
+
+            throw new Error('جميع محاولات الاتصال فشلت');
+        }
 
         // ════════════════════════════════════════════════
         //  STATE
@@ -1201,13 +1239,11 @@
                 form.append('username', FTTH_USER);
                 form.append('password', FTTH_PASS);
 
-                const res = await fetch(`${FTTH_URL}/api/auth/Contractor/token`, {
+                const res = await proxyFetch(`${FTTH_URL}/api/auth/Contractor/token`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'Accept': 'application/json, text/plain, */*',
-                        'Origin': FTTH_URL,
-                        'Referer': `${FTTH_URL}/auth/login`,
                     },
                     body: form
                 });
@@ -1265,31 +1301,27 @@
         }
 
         // ════════════════════════════════════════════════
-        //  SEARCH TYPE SWITCH
+        //  SMART TYPE DETECTION
         // ════════════════════════════════════════════════
-        function setSearchType(type) {
-            searchType = type;
-            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
+        function detectSearchType(q) {
+            if (!q) return 'name';
+            const hasArabic = /[\u0600-\u06FF]/.test(q);
+            const hasLatin = /[a-zA-Z]/.test(q);
+            const isAllDigits = /^[\d+ ()-]+$/.test(q);
 
-            const label = document.getElementById('searchLabel');
-            const icon = document.getElementById('searchIcon');
-            const input = document.getElementById('searchInput');
+            if (isAllDigits && q.replace(/\D/g, '').length >= 4) return 'number';
+            if (hasArabic) return 'name';
+            if (hasLatin) return 'username';
+            return 'name';
+        }
 
-            const config = {
-                username: { label: 'ادخل اسم المستخدم (يوزر)', icon: '🧑‍💻', ph: 'مثال: user123' },
-                name: { label: 'ادخل اسم المشترك (جزء من الاسم يكفي)', icon: '📝', ph: 'مثال: توفيق' },
-                number: { label: 'ادخل رقم المشترك', icon: '📞', ph: 'مثال: 07701234567' },
+        function getTypeLabel(type) {
+            const labels = {
+                username: '🧑‍💻 يبحث باليوزر',
+                name: '📝 يبحث بالاسم',
+                number: '📞 يبحث بالرقم'
             };
-
-            const c = config[type];
-            label.textContent = c.label;
-            icon.textContent = c.icon;
-            input.placeholder = c.ph;
-            input.value = '';
-            input.focus();
-
-            document.getElementById('suggestBox').classList.add('hidden');
-            document.getElementById('resultsContainer').innerHTML = '';
+            return labels[type] || '';
         }
 
         // ════════════════════════════════════════════════
@@ -1298,6 +1330,18 @@
         function onSearchInput() {
             clearTimeout(searchTimer);
             const q = document.getElementById('searchInput').value.trim();
+            const hint = document.getElementById('searchHint');
+
+            if (q.length < 1) {
+                hint.innerHTML = '';
+                document.getElementById('suggestBox').classList.add('hidden');
+                return;
+            }
+
+            // Show detected type hint
+            const detected = detectSearchType(q);
+            searchType = detected;
+            hint.innerHTML = `<span style="color:var(--blue);font-weight:600;">${getTypeLabel(detected)}</span>`;
 
             if (q.length < 2) {
                 document.getElementById('suggestBox').classList.add('hidden');
@@ -1333,7 +1377,7 @@
 
                 let html = '<div class="suggest-list">';
                 items.forEach((sub, i) => {
-                    const name = sub.name || sub.subscriberName || sub.fullName || '—';
+                    const name = sub.customer?.displayValue || sub.name || sub.subscriberName || sub.fullName || '—';
                     const uname = sub.username || sub.userName || '';
                     html += `<div class="suggest-item" onclick="selectSuggestion(${i})" data-index="${i}">
                         <div class="name">${name}</div>
@@ -1368,13 +1412,12 @@
         //  FTTH API HELPERS
         // ════════════════════════════════════════════════
         async function ftthGet(path) {
-            const res = await fetch(`${FTTH_URL}${path}`, {
+            const url = `${FTTH_URL}${path}`;
+            const res = await proxyFetch(url, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${ftthToken}`,
                     'Accept': 'application/json, text/plain, */*',
-                    'Origin': FTTH_URL,
-                    'Referer': `${FTTH_URL}/`,
                 }
             });
             if (res.status === 401) {
@@ -1387,19 +1430,53 @@
         }
 
         async function ftthSearch(query) {
-            const params = new URLSearchParams();
-            params.append('pageSize', '20');
-            params.append('pageNumber', '1');
-            params.append('sortCriteria.property', 'expires');
-            params.append('sortCriteria.direction', 'asc');
-            params.append('hierarchyLevel', '0');
+            const type = detectSearchType(query);
+            searchType = type;
 
-            switch (searchType) {
+            const baseParams = () => {
+                const p = new URLSearchParams();
+                p.append('pageSize', '20');
+                p.append('pageNumber', '1');
+                p.append('sortCriteria.property', 'expires');
+                p.append('sortCriteria.direction', 'asc');
+                p.append('hierarchyLevel', '0');
+                return p;
+            };
+
+            // Primary search based on detected type
+            const params = baseParams();
+            switch (type) {
                 case 'username': params.append('username', query); break;
                 case 'name': params.append('name', query); break;
                 case 'number': params.append('phone', query); break;
             }
 
+            let results = await fetchResults(params);
+
+            // If no results with primary type, try other types too
+            if (results.length === 0) {
+                const fallbackTypes = ['name', 'username', 'number'].filter(t => t !== type);
+                for (const fbType of fallbackTypes) {
+                    const fbParams = baseParams();
+                    switch (fbType) {
+                        case 'username': fbParams.append('username', query); break;
+                        case 'name': fbParams.append('name', query); break;
+                        case 'number': fbParams.append('phone', query); break;
+                    }
+                    const fbResults = await fetchResults(fbParams);
+                    if (fbResults.length > 0) {
+                        // Update hint to show what actually worked
+                        const hint = document.getElementById('searchHint');
+                        if (hint) hint.innerHTML = `<span style="color:var(--green);font-weight:600;">${getTypeLabel(fbType)} ✓</span>`;
+                        return fbResults;
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        async function fetchResults(params) {
             const data = await ftthGet(`/api/subscriptions?${params.toString()}`);
             if (!data) return [];
             if (Array.isArray(data)) return data;
@@ -1475,12 +1552,34 @@
 
         function v(sub, ...keys) {
             for (const k of keys) {
-                if (sub[k] !== undefined && sub[k] !== null && sub[k] !== '') return sub[k];
+                // Support nested paths like 'customer.displayValue'
+                if (k.includes('.')) {
+                    const parts = k.split('.');
+                    let val = sub;
+                    for (const p of parts) {
+                        if (val && typeof val === 'object') val = val[p];
+                        else { val = undefined; break; }
+                    }
+                    if (val !== undefined && val !== null && val !== '') return val;
+                } else {
+                    // Also check if key is a nested object with displayValue
+                    if (sub[k] !== undefined && sub[k] !== null && sub[k] !== '') {
+                        if (typeof sub[k] === 'object' && sub[k].displayValue) return sub[k].displayValue;
+                        return sub[k];
+                    }
+                }
             }
             return '—';
         }
 
         function getStatus(sub) {
+            // Check status field directly (API returns "Active", "Expired", etc.)
+            if (sub.status) {
+                const s = sub.status.toLowerCase();
+                if (s === 'expired' || s === 'منتهي') return { label: 'منتهي', cls: 'badge-red' };
+                if (s === 'active' || s === 'فعال') return { label: 'فعال', cls: 'badge-green' };
+                return { label: sub.status, cls: 'badge-amber' };
+            }
             if (!sub.expires) return { label: 'غير معروف', cls: 'badge-amber' };
             const exp = new Date(sub.expires);
             if (exp < new Date()) return { label: 'منتهي', cls: 'badge-red' };
@@ -1505,7 +1604,6 @@
             if (rx === null || rx === undefined || rx === '') return { val: '—', pct: 0, cls: '' };
             const num = parseFloat(rx);
             if (isNaN(num)) return { val: rx, pct: 50, cls: 'signal-ok' };
-            // Signal quality: > -20 = good, -20 to -25 = ok, < -25 = bad
             let pct, cls;
             if (num > -20) { pct = 90; cls = 'signal-good'; }
             else if (num > -25) { pct = 55; cls = 'signal-ok'; }
@@ -1535,24 +1633,31 @@
                 const session = getSessionStatus(sub);
                 const signal = getSignalInfo(sub);
 
-                const name = v(sub, 'name', 'subscriberName', 'fullName');
+                // ── ACTUAL API FIELD MAPPING ──
+                // Name: customer.displayValue or customer object
+                const name = v(sub, 'customer.displayValue', 'customer', 'name', 'subscriberName', 'fullName');
                 const uname = v(sub, 'username', 'userName');
-                const phone = v(sub, 'phone', 'mobile', 'phoneNumber');
+                const phone = v(sub, 'phone', 'mobile', 'phoneNumber', 'customer.phone');
 
-                // Device / ONT info
-                const ontModel = v(sub, 'ontModel', 'ontType', 'deviceName', 'deviceModel', 'ontName', 'ont_model');
-                const ontSerial = v(sub, 'ontSerial', 'ontSn', 'serialNumber', 'ontSerialNumber', 'ont_serial', 'sn');
-                const fdt = v(sub, 'fdt', 'fdtName', 'fdt_name', 'fdtCode');
-                const fat = v(sub, 'fat', 'fatName', 'fat_name', 'fatCode');
+                // Device / ONT: from detail API
+                const ontModel = v(sub, 'ontModel', 'ontType', 'deviceName', 'deviceModel', 'ontName');
+                const ontSerial = v(sub, 'ontSerial', 'ontSn', 'serialNumber', 'ontSerialNumber', 'sn');
+                const fdt = v(sub, 'zone.displayValue', 'zone', 'fdt', 'fdtName', 'fdtCode');
+                const fat = v(sub, 'fat', 'fatName', 'fatCode');
 
-                // Subscription info
-                const plan = v(sub, 'planName', 'plan', 'profileName', 'profile', 'serviceName', 'service');
-                const devicePw = v(sub, 'password', 'devicePassword', 'ontPassword', 'pppoePassword', 'pppoe_password');
+                // Subscription: bundle.displayValue, services
+                const plan = v(sub, 'bundle.displayValue', 'bundle', 'planName', 'plan', 'profileName', 'profile', 'self.displayValue');
+                const devicePw = v(sub, 'password', 'devicePassword', 'ontPassword', 'pppoePassword');
                 const exp = fmtDate(sub.expires || sub.expiryDate);
+                const act = fmtDate(sub.startedAt || sub.activationDate || sub.createdAt);
+
+                // Subscriber ID
+                const subId = v(sub, 'self.id', 'id', 'subscriptionId', 'subscriberId');
+                const custId = v(sub, 'customer.id', 'customerId');
 
                 // IP / MAC
-                const ip = v(sub, 'ipAddress', 'ip', 'framedIpAddress', 'activeSession.ipAddress', 'assignedIp');
-                const mac = v(sub, 'macAddress', 'mac', 'ontMac', 'activeSession.macAddress');
+                const ip = v(sub, 'ipAddress', 'ip', 'framedIpAddress', 'assignedIp');
+                const mac = v(sub, 'macAddress', 'mac', 'ontMac');
 
                 html += `
                 <div class="result" style="animation-delay:${i * 0.06}s">
