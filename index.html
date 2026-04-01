@@ -1031,7 +1031,9 @@
                         <input type="text" id="searchInput" placeholder="اكتب اسم، يوزر، أو رقم..." autocomplete="off"
                             oninput="onSearchInput()" onkeydown="onSearchKey(event)">
                     </div>
-                    <div id="searchHint" style="display:flex;align-items:center;gap:5px;margin-top:6px;font-size:0.7rem;color:var(--muted);min-height:18px;"></div>
+                    <div id="searchHint"
+                        style="display:flex;align-items:center;gap:5px;margin-top:6px;font-size:0.7rem;color:var(--muted);min-height:18px;">
+                    </div>
                 </div>
 
                 <button class="btn btn-green" id="searchBtn" onclick="doSearch()">
@@ -1455,18 +1457,58 @@
             return [];
         }
 
-        // Fetch full subscriber details (technical info)
+        // Fetch full subscriber details from multiple endpoints
         async function fetchSubscriberDetail(sub) {
-            const id = sub.id || sub.subscriptionId || sub.subscriberId;
-            if (!id) return sub;
+            const subId = sub.self?.id || sub.id || sub.subscriptionId;
+            const custId = sub.customer?.id || sub.customerId;
+            if (!subId) return sub;
 
+            const enriched = { ...sub, _detailed: true };
+
+            // 1. Subscription detail → customerName, macAddress, ipAddress, devicePassword, ontSerial, fdt, fat, ontVendor
             try {
-                // Try to get detailed subscription info
-                const detail = await ftthGet(`/api/subscriptions/${id}`);
-                if (detail) return { ...sub, ...detail, _detailed: true };
+                const detail = await ftthGet(`/api/subscriptions/${subId}`);
+                if (detail) {
+                    const m = detail.model || detail;
+                    enriched.customerName = m.customerName;
+                    enriched.username = m.username || enriched.username;
+                    enriched.macAddress = m.macAddress;
+                    enriched.ipAddress = m.ipAddress;
+                    enriched.devicePassword = m.devicePassword;
+                    enriched.ontSerial = m.ontSerial;
+                    enriched.ontVendor = m.ontVendor?.displayValue || m.ontVendor;
+                    enriched.fdtDetail = m.fdt?.displayValue || m.fdt;
+                    enriched.fatDetail = m.fat?.displayValue || m.fat;
+                    enriched.partner = m.partner?.displayValue || m.partner;
+                    enriched.planDetail = m.displayValue || m.planName;
+                    enriched.detailId = m.id;
+                }
             } catch { }
 
-            return sub;
+            // 2. Customer detail → phone, address
+            if (custId) {
+                try {
+                    const cust = await ftthGet(`/api/customers/${custId}`);
+                    if (cust) {
+                        const m = cust.model || cust;
+                        enriched.phone = m.primaryContact?.mobile || m.phone;
+                        enriched.address = m.addresses?.[0]?.displayValue;
+                        enriched.email = m.primaryContact?.email;
+                    }
+                } catch { }
+            }
+
+            // 3. ONT status → Up/Down, rxPower
+            try {
+                const ont = await ftthGet(`/api/subscriptions/${subId}/ont-status`);
+                if (ont) {
+                    const m = ont.model || ont;
+                    enriched.ontStatus = m.status?.displayValue || m.status;
+                    enriched.rxPower = m.rxPower;
+                }
+            } catch { }
+
+            return enriched;
         }
 
         // ════════════════════════════════════════════════
@@ -1542,12 +1584,18 @@
         }
 
         function getStatus(sub) {
-            // Check status field directly (API returns "Active", "Expired", etc.)
+            // Check status from ONT status endpoint
+            if (sub.ontStatus) {
+                const s = String(sub.ontStatus).toLowerCase();
+                if (s === 'up' || s === 'online') return { label: 'متصل ✓', cls: 'badge-green' };
+                if (s === 'down' || s === 'offline') return { label: 'غير متصل', cls: 'badge-red' };
+            }
+            // Check status field directly (API returns "Active", "Expired")
             if (sub.status) {
-                const s = sub.status.toLowerCase();
+                const s = typeof sub.status === 'string' ? sub.status.toLowerCase() : '';
                 if (s === 'expired' || s === 'منتهي') return { label: 'منتهي', cls: 'badge-red' };
                 if (s === 'active' || s === 'فعال') return { label: 'فعال', cls: 'badge-green' };
-                return { label: sub.status, cls: 'badge-amber' };
+                if (s) return { label: sub.status, cls: 'badge-amber' };
             }
             if (!sub.expires) return { label: 'غير معروف', cls: 'badge-amber' };
             const exp = new Date(sub.expires);
@@ -1555,21 +1603,17 @@
             return { label: 'فعال', cls: 'badge-green' };
         }
 
-        function getSessionStatus(sub) {
-            const s = sub.sessionStatus || sub.activeSessionStatus ||
-                sub.activeSession?.status || sub.session?.status || '';
-            const sLower = String(s).toLowerCase();
-            if (sLower === 'up' || sLower === 'online' || sLower === 'active' || s === 'متصل')
-                return { label: 'متصل (Up)', cls: 'badge-green' };
-            if (sLower === 'down' || sLower === 'offline' || sLower === 'inactive' || s === 'غير متصل')
-                return { label: 'غير متصل (Down)', cls: 'badge-red' };
-            if (s) return { label: s, cls: 'badge-amber' };
-            return { label: '—', cls: 'badge-amber' };
+        function getOntStatus(sub) {
+            const s = sub.ontStatus;
+            if (!s) return { label: '—', cls: 'badge-amber' };
+            const sl = String(s).toLowerCase();
+            if (sl === 'up' || sl === 'online') return { label: 'متصل (Up)', cls: 'badge-green' };
+            if (sl === 'down' || sl === 'offline') return { label: 'غير متصل (Down)', cls: 'badge-red' };
+            return { label: s, cls: 'badge-amber' };
         }
 
         function getSignalInfo(sub) {
-            const rx = sub.rxPower || sub.receivePower || sub.signalLevel ||
-                sub.rxSignal || sub.ontRxPower || sub.activeSession?.rxPower || null;
+            const rx = sub.rxPower;
             if (rx === null || rx === undefined || rx === '') return { val: '—', pct: 0, cls: '' };
             const num = parseFloat(rx);
             if (isNaN(num)) return { val: rx, pct: 50, cls: 'signal-ok' };
@@ -1599,34 +1643,30 @@
 
             items.forEach((sub, i) => {
                 const status = getStatus(sub);
-                const session = getSessionStatus(sub);
+                const ontSt = getOntStatus(sub);
                 const signal = getSignalInfo(sub);
 
-                // ── ACTUAL API FIELD MAPPING ──
-                // Name: customer.displayValue or customer object
-                const name = v(sub, 'customer.displayValue', 'customer', 'name', 'subscriberName', 'fullName');
-                const uname = v(sub, 'username', 'userName');
-                const phone = v(sub, 'phone', 'mobile', 'phoneNumber', 'customer.phone');
+                // ── FIELD MAPPING (based on real API) ──
+                const name = sub.customerName || sub.customer?.displayValue || '—';
+                const uname = sub.username || '—';
+                const phone = sub.phone || sub.primaryContact?.mobile || '—';
+                const address = sub.address || '—';
 
-                // Device / ONT: from detail API
-                const ontModel = v(sub, 'ontModel', 'ontType', 'deviceName', 'deviceModel', 'ontName');
-                const ontSerial = v(sub, 'ontSerial', 'ontSn', 'serialNumber', 'ontSerialNumber', 'sn');
-                const fdt = v(sub, 'zone.displayValue', 'zone', 'fdt', 'fdtName', 'fdtCode');
-                const fat = v(sub, 'fat', 'fatName', 'fatCode');
+                // Device (from subscription detail)
+                const ontVendor = sub.ontVendor || '—';
+                const ontSerial = sub.ontSerial || '—';
+                const fdt = sub.fdtDetail || sub.zone?.displayValue || '—';
+                const fat = sub.fatDetail || '—';
 
-                // Subscription: bundle.displayValue, services
-                const plan = v(sub, 'bundle.displayValue', 'bundle', 'planName', 'plan', 'profileName', 'profile', 'self.displayValue');
-                const devicePw = v(sub, 'password', 'devicePassword', 'ontPassword', 'pppoePassword');
-                const exp = fmtDate(sub.expires || sub.expiryDate);
-                const act = fmtDate(sub.startedAt || sub.activationDate || sub.createdAt);
+                // Subscription
+                const plan = sub.planDetail || sub.bundle?.displayValue || sub.self?.displayValue || '—';
+                const devicePw = sub.devicePassword || '—';
+                const exp = fmtDate(sub.expires);
+                const act = fmtDate(sub.startedAt);
 
-                // Subscriber ID
-                const subId = v(sub, 'self.id', 'id', 'subscriptionId', 'subscriberId');
-                const custId = v(sub, 'customer.id', 'customerId');
-
-                // IP / MAC
-                const ip = v(sub, 'ipAddress', 'ip', 'framedIpAddress', 'assignedIp');
-                const mac = v(sub, 'macAddress', 'mac', 'ontMac');
+                // Technical
+                const ip = sub.ipAddress || '—';
+                const mac = sub.macAddress || '—';
 
                 html += `
                 <div class="result" style="animation-delay:${i * 0.06}s">
@@ -1657,6 +1697,10 @@
                                 <span class="field-label">اليوزر</span>
                                 <span class="field-value">${uname}</span>
                             </div>
+                            <div class="field">
+                                <span class="field-label">العنوان</span>
+                                <span class="field-value" style="font-size:0.72rem">${address}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1669,7 +1713,7 @@
                         <div class="result-grid">
                             <div class="field">
                                 <span class="field-label">اسم الجهاز (ONT)</span>
-                                <span class="field-value">${ontModel}</span>
+                                <span class="field-value">${ontVendor}</span>
                             </div>
                             <div class="field">
                                 <span class="field-label">تسلسل ONT</span>
@@ -1702,8 +1746,12 @@
                                 <span class="field-value">${devicePw}</span>
                             </div>
                             <div class="field">
-                                <span class="field-label">تاريخ انتهاء الصلاحية</span>
+                                <span class="field-label">تاريخ الانتهاء</span>
                                 <span class="field-value">${exp}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">تاريخ التفعيل</span>
+                                <span class="field-value">${act}</span>
                             </div>
                         </div>
                     </div>
@@ -1716,8 +1764,8 @@
                         </div>
                         <div class="result-grid">
                             <div class="field">
-                                <span class="field-label">حالة الجلسة</span>
-                                <span class="badge ${session.cls}" style="align-self:flex-start;margin-top:2px;">${session.label}</span>
+                                <span class="field-label">حالة الجهاز (ONT)</span>
+                                <span class="badge ${ontSt.cls}" style="align-self:flex-start;margin-top:2px;">${ontSt.label}</span>
                             </div>
                             <div class="field">
                                 <span class="field-label">القدرة المستلمة (RX Power)</span>
