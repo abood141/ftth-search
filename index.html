@@ -929,6 +929,322 @@
                 transform: translateY(0);
             }
         }
+
+        /* ── Remember Me Toggle ── */
+        .remember-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .remember-row span {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .toggle-wrap {
+            position: relative;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle-wrap input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: var(--bg4);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-wrap input:checked+.toggle-track {
+            background: var(--blue);
+        }
+
+        .toggle-wrap input:checked+.toggle-track::after {
+            transform: translateX(18px);
+        }
+
+        /* ── Smart Diagnostic Tips ── */
+        .diag-tips {
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .diag-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .diag-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .diag-tip:last-child {
+            margin-bottom: 0;
+        }
+
+        .diag-ok {
+            background: rgba(16, 217, 160, 0.08);
+            color: var(--green);
+            border: 1px solid rgba(16, 217, 160, 0.15);
+        }
+
+        .diag-warn {
+            background: rgba(245, 166, 35, 0.08);
+            color: var(--amber);
+            border: 1px solid rgba(245, 166, 35, 0.15);
+        }
+
+        .diag-err {
+            background: rgba(247, 93, 93, 0.08);
+            color: var(--red);
+            border: 1px solid rgba(247, 93, 93, 0.15);
+        }
+
+        /* ── Copy Feedback ── */
+        .field-value {
+            cursor: pointer;
+            position: relative;
+            transition: color 0.15s;
+        }
+
+        .field-value:hover {
+            color: var(--blue);
+        }
+
+        .field-value.copied {
+            color: var(--green) !important;
+        }
+
+        .field-value.copied::after {
+            content: ' ✓';
+        }
+
+        /* ── Search History ── */
+        .history-box {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            max-height: 240px;
+            overflow-y: auto;
+            margin-bottom: 14px;
+        }
+
+        .history-title {
+            padding: 10px 14px 6px;
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-clear {
+            background: none;
+            border: none;
+            color: var(--red);
+            font-size: 0.68rem;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .history-clear:hover {
+            background: rgba(247, 93, 93, 0.1);
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 14px;
+            cursor: pointer;
+            border-top: 1px solid rgba(30, 45, 69, 0.4);
+            transition: background 0.15s;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        .history-item:hover {
+            background: rgba(79, 142, 247, 0.08);
+        }
+
+        .history-item .h-query {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .history-item .h-name {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .history-item .h-time {
+            font-size: 0.65rem;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        /* ── FAB Search Button ── */
+        .fab {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green-d), var(--green));
+            color: #fff;
+            border: none;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(16, 217, 160, 0.35);
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .fab.visible {
+            transform: translateX(-50%) scale(1);
+        }
+
+        .fab:active {
+            transform: translateX(-50%) scale(0.9);
+        }
+
+        /* ── Auto-refresh Badge ── */
+        .refresh-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .refresh-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.65rem;
+            color: var(--muted);
+            padding: 3px 8px;
+            background: var(--bg4);
+            border-radius: 10px;
+        }
+
+        .refresh-badge.active {
+            color: var(--green);
+        }
+
+        .refresh-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+
+        .refresh-pulse {
+            animation: r-pulse 0.6s ease;
+        }
+
+        @keyframes r-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* ── Glassmorphism (subtle) ── */
+        .card-glass {
+            background: rgba(13, 18, 32, 0.55) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        @supports not (backdrop-filter: blur(1px)) {
+            .card-glass {
+                background: var(--bg2) !important;
+            }
+        }
+
+        /* ── Mobile Touch ── */
+        @media (max-width: 480px) {
+
+            .btn,
+            .tab,
+            .suggest-item,
+            .history-item {
+                min-height: 44px;
+            }
+
+            .fab {
+                bottom: 24px;
+                width: 50px;
+                height: 50px;
+            }
+
+            input[type="text"],
+            input[type="password"] {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -951,7 +1267,7 @@
         <!-- LOGIN SECTION -->
         <!-- ══════════════════════════════════════════════ -->
         <section id="loginSection" class="fade-in">
-            <div class="card card-glow-blue">
+            <div class="card card-glow-blue card-glass">
                 <div class="card-title">
                     <div class="icon icon-blue">🔐</div>
                     تسجيل الدخول
@@ -972,6 +1288,14 @@
                         <input type="password" id="loginPass" placeholder="كلمة المرور" autocomplete="current-password">
                         <button class="pw-toggle" id="togglePass" type="button">👁</button>
                     </div>
+                </div>
+
+                <div class="remember-row">
+                    <label class="toggle-wrap">
+                        <input type="checkbox" id="rememberMe">
+                        <div class="toggle-track"></div>
+                    </label>
+                    <span>تذكرني</span>
                 </div>
 
                 <div id="loginError" class="hidden"
@@ -1017,7 +1341,7 @@
             </div>
 
             <!-- Search Card -->
-            <div class="card card-glow-green">
+            <div class="card card-glow-green card-glass">
                 <div class="card-title">
                     <div class="icon icon-green">🔍</div>
                     بحث عن مشترك
@@ -1029,9 +1353,12 @@
                     <div class="input-wrap">
                         <span class="ico" id="searchIcon">🔍</span>
                         <input type="text" id="searchInput" placeholder="اكتب اسم، يوزر، أو رقم..." autocomplete="off"
-                            oninput="onSearchInput()" onkeydown="onSearchKey(event)">
+                            oninput="onSearchInput()" onkeydown="onSearchKey(event)" onfocus="onSearchFocus()"
+                            onblur="setTimeout(()=>hideHistory(),200)">
                     </div>
-                    <div id="searchHint" style="display:flex;align-items:center;gap:5px;margin-top:6px;font-size:0.7rem;color:var(--muted);min-height:18px;"></div>
+                    <div id="searchHint"
+                        style="display:flex;align-items:center;gap:5px;margin-top:6px;font-size:0.7rem;color:var(--muted);min-height:18px;">
+                    </div>
                 </div>
 
                 <button class="btn btn-green" id="searchBtn" onclick="doSearch()">
@@ -1039,13 +1366,19 @@
                 </button>
             </div>
 
-            <!-- Suggestion List (shown during typing for partial search) -->
+            <!-- Suggestion List -->
             <div id="suggestBox" class="hidden"></div>
+
+            <!-- Search History -->
+            <div id="historyBox" class="hidden"></div>
 
             <!-- Results -->
             <div id="resultsContainer"></div>
         </section>
     </div>
+
+    <!-- FAB Search Button -->
+    <button class="fab" id="fabSearch" onclick="scrollToSearch()">🔍</button>
 
     <!-- Toast -->
     <div class="toast-wrap" id="toastWrap"></div>
@@ -1058,18 +1391,47 @@
         const FTTH_USER = 'link1';
         const FTTH_PASS = 'ALI931990ali';
 
+        // ── Proxy Config ──
+        // Set your own proxy URL after deploying proxy/server.js
+        const PROXY_URL = ''; // e.g. 'https://your-ftth-proxy.onrender.com'
+        const FALLBACK_PROXIES = ['https://corsproxy.io/?url='];
+        let _proxyMode = -1; // cached working proxy index
+
         // SpaceLink Supabase (technician auth)
         const SB_URL = 'https://icpqrnzvxjexdzwfkcjm.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljcHFybnp2eGpleGR6d2ZrY2ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDE2ODksImV4cCI6MjA4OTQxNzY4OX0.mvnD_Cr1EbBtMLiD0VwhdxXAo8bSDTRxRyF2Squ0aE8';
         const SB_HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
 
         // ════════════════════════════════════════════════
-        //  NETWORK LAYER
+        //  NETWORK LAYER (CORS Proxy + Fallback)
         // ════════════════════════════════════════════════
         const isLocal = location.protocol === 'file:';
 
+        function _buildStrategies(url) {
+            const s = [];
+            if (PROXY_URL) { const u = new URL(url); s.push(PROXY_URL + u.pathname + u.search); }
+            FALLBACK_PROXIES.forEach(p => s.push(p + encodeURIComponent(url)));
+            s.push(url); // direct as last resort
+            return s;
+        }
+
         async function proxyFetch(url, opts = {}) {
-            return fetch(url, opts);
+            const strategies = _buildStrategies(url);
+            // Try cached working proxy first
+            if (_proxyMode >= 0 && _proxyMode < strategies.length) {
+                try {
+                    const r = await fetch(strategies[_proxyMode], opts);
+                    if (r.ok || r.status === 401) return r;
+                } catch { _proxyMode = -1; }
+            }
+            // Try each strategy
+            for (let i = 0; i < strategies.length; i++) {
+                try {
+                    const r = await fetch(strategies[i], opts);
+                    if (r.ok || r.status === 401 || r.status === 400) { _proxyMode = i; return r; }
+                } catch { }
+            }
+            throw new Error('جميع طرق الاتصال فشلت');
         }
 
         // ════════════════════════════════════════════════
@@ -1079,6 +1441,8 @@
         let searchType = 'username';
         let currentUser = null;
         let searchTimer = null;
+        let autoRefreshTimer = null;
+        let autoRefreshSubs = [];
 
         // ════════════════════════════════════════════════
         //  HASH (same as SpaceLink DJB2)
@@ -1113,6 +1477,149 @@
                 el.style.opacity = '0'; el.style.transform = 'translateY(-14px)'; el.style.transition = 'all 0.25s';
                 setTimeout(() => el.remove(), 250);
             }, 3200);
+        }
+
+        // ════════════════════════════════════════════════
+        //  UTILITIES
+        // ════════════════════════════════════════════════
+        function vibrate(ms = 30) { try { navigator.vibrate?.(ms); } catch { } }
+
+        function copyToClipboard(text) {
+            if (!text || text === '—') return;
+            if (navigator.clipboard) navigator.clipboard.writeText(text);
+            else { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+            vibrate();
+            toast('تم النسخ 📋');
+        }
+
+        // Click any field-value to copy
+        document.addEventListener('click', e => {
+            const fv = e.target.closest('.field-value');
+            if (fv && fv.textContent.trim() !== '—') {
+                copyToClipboard(fv.textContent.trim());
+                fv.classList.add('copied');
+                setTimeout(() => fv.classList.remove('copied'), 1200);
+            }
+        });
+
+        // Vibration on buttons
+        document.addEventListener('click', e => {
+            if (e.target.closest('.btn, .tab, .fab')) vibrate();
+        });
+
+        // ════════════════════════════════════════════════
+        //  SEARCH HISTORY
+        // ════════════════════════════════════════════════
+        function saveHistory(query, resultName) {
+            let h = JSON.parse(localStorage.getItem('ftth_history') || '[]');
+            h = h.filter(x => x.q !== query);
+            h.unshift({ q: query, name: resultName || '', ts: Date.now() });
+            if (h.length > 20) h = h.slice(0, 20);
+            localStorage.setItem('ftth_history', JSON.stringify(h));
+        }
+
+        function getTimeAgo(ts) {
+            const m = Math.floor((Date.now() - ts) / 60000);
+            if (m < 1) return 'الآن';
+            if (m < 60) return `قبل ${m} دقيقة`;
+            const hr = Math.floor(m / 60);
+            if (hr < 24) return `قبل ${hr} ساعة`;
+            return `قبل ${Math.floor(hr / 24)} يوم`;
+        }
+
+        function onSearchFocus() {
+            const q = document.getElementById('searchInput').value.trim();
+            if (q.length > 0) return;
+            showHistory();
+        }
+
+        function showHistory() {
+            const h = JSON.parse(localStorage.getItem('ftth_history') || '[]');
+            const box = document.getElementById('historyBox');
+            if (h.length === 0) { box.classList.add('hidden'); return; }
+            let html = '<div class="history-box"><div class="history-title"><span>📜 عمليات بحث سابقة</span><button class="history-clear" onclick="clearHistory()">مسح</button></div>';
+            h.forEach(item => {
+                html += `<div class="history-item" onclick="useHistory('${item.q.replace(/'/g, "\\'")}')"><div><div class="h-query">${item.q}</div>${item.name ? `<div class="h-name">${item.name}</div>` : ''}</div><div class="h-time">${getTimeAgo(item.ts)}</div></div>`;
+            });
+            html += '</div>';
+            box.innerHTML = html;
+            box.classList.remove('hidden');
+        }
+
+        function hideHistory() { document.getElementById('historyBox').classList.add('hidden'); }
+
+        function useHistory(q) {
+            document.getElementById('searchInput').value = q;
+            hideHistory();
+            doSearch();
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('ftth_history');
+            hideHistory();
+            toast('تم مسح السجل');
+        }
+
+        // ════════════════════════════════════════════════
+        //  FAB + SCROLL
+        // ════════════════════════════════════════════════
+        function scrollToSearch() {
+            vibrate();
+            document.getElementById('searchInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => document.getElementById('searchInput').focus(), 400);
+        }
+
+        window.addEventListener('scroll', () => {
+            const fab = document.getElementById('fabSearch');
+            const show = window.scrollY > 300 && !document.getElementById('searchSection').classList.contains('hidden');
+            fab.classList.toggle('visible', show);
+        }, { passive: true });
+
+        // ════════════════════════════════════════════════
+        //  AUTO-REFRESH ONT STATUS
+        // ════════════════════════════════════════════════
+        function startAutoRefresh(subs) {
+            stopAutoRefresh();
+            autoRefreshSubs = subs.filter(s => s._detailed && (s.self?.id || s.id));
+            if (autoRefreshSubs.length === 0) return;
+            autoRefreshTimer = setInterval(doAutoRefresh, 10000);
+            // Show badge
+            document.querySelectorAll('.refresh-badge').forEach(b => b.classList.add('active'));
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+            autoRefreshSubs = [];
+        }
+
+        async function doAutoRefresh() {
+            for (const sub of autoRefreshSubs) {
+                const subId = sub.self?.id || sub.id;
+                if (!subId) continue;
+                try {
+                    const ont = await ftthGet(`/api/subscriptions/${subId}/ont-status`);
+                    if (!ont) continue;
+                    const m = ont.model || ont;
+                    sub.ontStatus = m.status?.displayValue || m.status;
+                    sub.rxPower = m.rxPower;
+                    // Update DOM
+                    const card = document.querySelector(`[data-sub-id="${subId}"]`);
+                    if (card) {
+                        const ontBadge = card.querySelector('.ont-badge');
+                        const rxVal = card.querySelector('.rx-val');
+                        const ontSt = getOntStatus(sub);
+                        const sig = getSignalInfo(sub);
+                        if (ontBadge) { ontBadge.className = `badge ont-badge ${ontSt.cls}`; ontBadge.textContent = ontSt.label; }
+                        if (rxVal) { rxVal.textContent = sig.val; rxVal.style.color = sig.cls === 'signal-good' ? 'var(--green)' : sig.cls === 'signal-bad' ? 'var(--red)' : 'var(--amber)'; }
+                        // Pulse animation
+                        const section = card.querySelector('.tech-section');
+                        if (section) { section.classList.add('refresh-pulse'); setTimeout(() => section.classList.remove('refresh-pulse'), 600); }
+                        // Update time
+                        const timeEl = card.querySelector('.refresh-time');
+                        if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    }
+                } catch { }
+            }
         }
 
         // ════════════════════════════════════════════════
@@ -1161,6 +1668,16 @@
                 } catch { }
 
                 currentUser = { username: u, techId: techUser.tech_id, name: techName };
+
+                // Save session if remember me is checked
+                if (document.getElementById('rememberMe').checked) {
+                    localStorage.setItem('ftth_session', JSON.stringify({
+                        username: currentUser.username,
+                        techId: currentUser.techId,
+                        name: currentUser.name,
+                        ts: Date.now()
+                    }));
+                }
 
                 // Now connect to FTTH
                 document.getElementById('loginSection').classList.add('hidden');
@@ -1261,6 +1778,7 @@
         function doLogout() {
             ftthToken = null;
             currentUser = null;
+            localStorage.removeItem('ftth_session');
             document.getElementById('searchSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('loginPass').value = '';
@@ -1541,6 +2059,13 @@
                         items[i] = detailed;
                     }
                     renderResults(items, query);
+                    startAutoRefresh(items);
+                }
+
+                // Save to history
+                if (items && items.length > 0) {
+                    const firstName = items[0].customerName || items[0].customer?.displayValue || '';
+                    saveHistory(query, firstName);
                 }
             } catch (err) {
                 container.innerHTML = '';
@@ -1666,8 +2191,19 @@
                 const ip = sub.ipAddress || '—';
                 const mac = sub.macAddress || '—';
 
+                // Smart Diagnostic Tips
+                const tips = getDiagnosticTips(sub);
+                let diagHtml = '';
+                if (tips.length > 0) {
+                    diagHtml = '<div class="diag-tips"><div class="diag-title"><div class="sec-icon sec-purple">🧠</div>تشخيص ذكي</div>';
+                    tips.forEach(t => { diagHtml += `<div class="diag-tip diag-${t.t}">${t.m}</div>`; });
+                    diagHtml += '</div>';
+                }
+
+                const subId = sub.self?.id || sub.id || sub.subscriptionId || '';
+
                 html += `
-                <div class="result" style="animation-delay:${i * 0.06}s">
+                <div class="result" style="animation-delay:${i * 0.06}s" data-sub-id="${subId}">
                     <!-- Header -->
                     <div class="result-head">
                         <div class="result-name">${name}</div>
@@ -1755,19 +2291,22 @@
                     </div>
 
                     <!-- Section 4: الحالة الفنية -->
-                    <div class="result-section">
+                    <div class="result-section tech-section">
                         <div class="section-title">
                             <div class="sec-icon sec-amber">⚡</div>
                             الحالة الفنية
+                            <div style="margin-right:auto;display:flex;align-items:center;gap:6px;">
+                                <span class="refresh-badge">🔄 <span class="refresh-time">--:--</span></span>
+                            </div>
                         </div>
                         <div class="result-grid">
                             <div class="field">
                                 <span class="field-label">حالة الجهاز (ONT)</span>
-                                <span class="badge ${ontSt.cls}" style="align-self:flex-start;margin-top:2px;">${ontSt.label}</span>
+                                <span class="badge ont-badge ${ontSt.cls}" style="align-self:flex-start;margin-top:2px;">${ontSt.label}</span>
                             </div>
                             <div class="field">
                                 <span class="field-label">القدرة المستلمة (RX Power)</span>
-                                <span class="field-value" style="color:${signal.cls === 'signal-good' ? 'var(--green)' : signal.cls === 'signal-bad' ? 'var(--red)' : 'var(--amber)'}">${signal.val}</span>
+                                <span class="field-value rx-val" style="color:${signal.cls === 'signal-good' ? 'var(--green)' : signal.cls === 'signal-bad' ? 'var(--red)' : 'var(--amber)'}">${signal.val}</span>
                                 ${signal.pct > 0 ? `<div class="signal-bar"><div class="bar"><div class="bar-fill ${signal.cls}" style="width:${signal.pct}%"></div></div></div>` : ''}
                             </div>
                             <div class="field">
@@ -1781,6 +2320,9 @@
                         </div>
                     </div>
 
+                    <!-- Smart Diagnostic Tips -->
+                    ${diagHtml}
+
                     <!-- Read-only footer -->
                     <div style="padding:8px 18px;background:var(--bg3);border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;">
                         <span style="font-size:0.68rem;color:var(--muted)">🔒 عرض فقط — لا يمكن التعديل</span>
@@ -1792,8 +2334,54 @@
         }
 
         // ════════════════════════════════════════════════
-        //  NO AUTO-LOGIN — always require technician credentials
+        //  SMART DIAGNOSTICS
         // ════════════════════════════════════════════════
+        function getDiagnosticTips(sub) {
+            const tips = [];
+            const rx = parseFloat(sub.rxPower);
+            if (!isNaN(rx)) {
+                if (rx > -20) tips.push({ t: 'ok', m: '✅ إشارة ممتازة' });
+                else if (rx > -25) tips.push({ t: 'warn', m: '⚠️ إشارة مقبولة — راقب الأداء' });
+                else if (rx > -28) tips.push({ t: 'warn', m: '⚠️ إشارة ضعيفة — تحقق من الكيبل أو FAT' });
+                else tips.push({ t: 'err', m: '❌ إشارة ضعيفة جداً — يجب فحص الخط بالكامل' });
+            }
+            if (sub.ontStatus) {
+                const s = String(sub.ontStatus).toLowerCase();
+                if (s === 'down' || s === 'offline')
+                    tips.push({ t: 'err', m: '⚠️ الجهاز مطفي أو مفصول — تحقق من التيار والكيبل الضوئي' });
+            }
+            if (sub.expires) {
+                const days = Math.ceil((new Date(sub.expires) - new Date()) / 86400000);
+                if (days < 0) tips.push({ t: 'err', m: '📅 الاشتراك منتهي منذ ' + Math.abs(days) + ' يوم' });
+                else if (days <= 3) tips.push({ t: 'warn', m: '📅 الاشتراك ينتهي خلال ' + days + ' يوم' });
+            }
+            return tips;
+        }
+
+        // ════════════════════════════════════════════════
+        //  AUTO-LOGIN (Stay Logged In)
+        // ════════════════════════════════════════════════
+        (async function autoLogin() {
+            const raw = localStorage.getItem('ftth_session');
+            if (!raw) return;
+            try {
+                const s = JSON.parse(raw);
+                // Expire after 7 days
+                if (Date.now() - s.ts > 7 * 24 * 3600000) { localStorage.removeItem('ftth_session'); return; }
+                currentUser = { username: s.username, techId: s.techId, name: s.name };
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('connectingSection').classList.remove('hidden');
+                const ok = await connectFTTH();
+                document.getElementById('connectingSection').classList.add('hidden');
+                if (ok) {
+                    showSearchView();
+                    toast('مرحباً مجدداً ' + s.name + ' 👋');
+                } else {
+                    document.getElementById('loginSection').classList.remove('hidden');
+                    localStorage.removeItem('ftth_session');
+                }
+            } catch { document.getElementById('loginSection').classList.remove('hidden'); }
+        })();
     </script>
 </body>
 
