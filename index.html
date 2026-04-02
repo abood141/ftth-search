@@ -1394,7 +1394,11 @@
         // ── Proxy Config ──
         // Set your own proxy URL after deploying proxy/server.js
         const PROXY_URL = ''; // e.g. 'https://your-ftth-proxy.onrender.com'
-        const FALLBACK_PROXIES = ['https://corsproxy.io/?url='];
+        const FALLBACK_PROXIES = [
+            'https://corsproxy.io/?url=',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://api.allorigins.win/raw?url=',
+        ];
         let _proxyMode = -1; // cached working proxy index
 
         // SpaceLink Supabase (technician auth)
@@ -1427,9 +1431,13 @@
             // Try each strategy
             for (let i = 0; i < strategies.length; i++) {
                 try {
+                    console.log(`[FTTH] Trying proxy ${i}: ${strategies[i].substring(0, 60)}...`);
                     const r = await fetch(strategies[i], opts);
+                    console.log(`[FTTH] Proxy ${i} responded: ${r.status}`);
                     if (r.ok || r.status === 401 || r.status === 400) { _proxyMode = i; return r; }
-                } catch { }
+                } catch (e) {
+                    console.warn(`[FTTH] Proxy ${i} failed:`, e.message);
+                }
             }
             throw new Error('جميع طرق الاتصال فشلت');
         }
